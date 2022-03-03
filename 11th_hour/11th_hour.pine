@@ -5,7 +5,7 @@
 indicator("Drippy's 11th hour", "11th hour", overlay=true, max_labels_count=200)
 // inputs
 i_eleventhStart = input.int(1050, "Start", options=[1045, 1050, 1055, 1100])
-i_eleventhStop = input.int(1105, "End", options=[1105, 1110, 1115, 1120, 1125])
+i_eleventhStop = input.int(1105, "End", options=[1105, 1110, 1115, 1120])
 i_alertOnUpTrend = input.bool (true, "Alert on uptrend")
 i_alertOnDownTrend = input.bool (false, "Alert on downtrend")
 i_useMorningBGColor = input.bool( true, "Apply background color for each morning bar")
@@ -14,24 +14,30 @@ i_useMorningBGColor = input.bool( true, "Apply background color for each morning
 morningTime = time(timeframe.period, "0000-" + str.tostring(i_eleventhStart))
 elventhHour = time(timeframe.period, str.tostring(i_eleventhStart)+"-"+str.tostring(i_eleventhStop+1))
 openBarIndex = ta.barssince( ((hour(time)*100) + minute(time)) < 930)
-morningHigherClose = 0.0
-morningLowerClose = 10000000.0
 
-// alert and coloring logic
-if(time == elventhHour and openBarIndex>0 and barstate.isconfirmed)
-    for i=1 to openBarIndex
-        if(close[i]>morningHigherClose)
-            morningHigherClose := close[i]
-        if(close[i]<morningLowerClose)
-            morningLowerClose := close[i]
-    if(close>=morningHigherClose)
-        tooltipAndAlertMsg = "New high during 11th hour ("+str.tostring(close)+">="+str.tostring(morningHigherClose)+"), day will likely trend up"
-        label.new(bar_index, high, "11th high", yloc=yloc.abovebar, color=color.green, textcolor=color.green, style=label.style_triangleup, size=size.small, tooltip=tooltipAndAlertMsg)
-        alert(tooltipAndAlertMsg, alert.freq_all)
-    else if (close<=morningLowerClose)
-        tooltipAndAlertMsg = "New low during 11th hour ("+str.tostring(close)+"<="+str.tostring(morningLowerClose)+"), day will likely trend down"
-        label.new(bar_index, low, "11th low", yloc=yloc.belowbar, color=color.red, textcolor=color.red, style=label.style_triangledown, size=size.small, tooltip=tooltipAndAlertMsg)
-        alert(tooltipAndAlertMsg, alert.freq_once_per_bar_close)
+var currentTradingDay = 0
+var morningHigherClose = 0.0
+var morningLowerClose = 10000000.0
+
+if(currentTradingDay == na or currentTradingDay != time_tradingday)
+    morningHigherClose := close
+    morningLowerClose  := close
+    currentTradingDay := time_tradingday
+    
+else
+    if(close>morningHigherClose)
+        morningHigherClose := close
+        if(time == elventhHour and barstate.isconfirmed)
+            tooltipAndAlertMsg = "New high during 11th hour ("+str.tostring(close)+">="+str.tostring(morningHigherClose)+"), day will likely trend up or close near HOD"
+            label.new(bar_index, high, "High", yloc=yloc.abovebar, color=color.green, textcolor=color.green, style=label.style_triangleup, size=size.small, tooltip=tooltipAndAlertMsg)
+            alert(tooltipAndAlertMsg, alert.freq_once_per_bar_close)
+    if(close<morningLowerClose)
+        morningLowerClose := close
+        if(time == elventhHour and barstate.isconfirmed)
+            tooltipAndAlertMsg = "New low during 11th hour ("+str.tostring(close)+"<="+str.tostring(morningLowerClose)+"), day will likely trend down  or close near LOD"
+            label.new(bar_index, low, "Low", yloc=yloc.belowbar, color=color.red, textcolor=color.red, style=label.style_triangledown, size=size.small, tooltip=tooltipAndAlertMsg)
+            alert(tooltipAndAlertMsg, alert.freq_once_per_bar_close)
+
 
 bgcolor( i_useMorningBGColor and (time == morningTime or time == elventhHour) ? color.rgb(123, 123, 123, 90) : na)
 bgcolor( (time == elventhHour) and (close>=morningHigherClose) ? color.rgb(0, 255, 0, 90) : na)
