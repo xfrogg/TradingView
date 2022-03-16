@@ -9,6 +9,7 @@ indicator('11th hour Screener', overlay=true)
 ////////////
 // INPUTS //
 
+i_size = input.string("normal", "Table size", options=["small", "normal", "large"])
 
 /////////////
 // SYMBOLS // 
@@ -409,12 +410,17 @@ array.push(supTime_arr, supTime40)
 
 var tbl = table.new(position.top_right, 6, 41, frame_color=#151715, frame_width=1, border_width=2, border_color=color.new(color.white, 100))
 
+textSize = switch i_size
+    "small" => size.small
+    "normal" => size.normal
+    "large" => size.large
+
 if barstate.islast
 
-    table.cell(tbl, 0, 0, 'Symbol',     text_halign = text.align_center, bgcolor = color.gray, text_color = color.white, text_size = size.small)
-    table.cell(tbl, 1, 0, 'Cur. Price',      text_halign = text.align_center, bgcolor = color.gray, text_color = color.white, text_size = size.small)
-    table.cell(tbl, 2, 0, '11AM Trend', text_halign = text.align_center, bgcolor = color.gray, text_color = color.white, text_size = size.small)
-    table.cell(tbl, 3, 0, '11AM Time', text_halign = text.align_center, bgcolor = color.gray, text_color = color.white, text_size = size.small)
+    table.cell(tbl, 0, 0, 'Symbol',     text_halign = text.align_center, bgcolor = color.gray, text_color = color.white, text_size = textSize)
+    table.cell(tbl, 1, 0, 'Cur. Price',      text_halign = text.align_center, bgcolor = color.gray, text_color = color.white, text_size = textSize)
+    table.cell(tbl, 2, 0, '11AM Trend', text_halign = text.align_center, bgcolor = color.gray, text_color = color.white, text_size = textSize)
+    table.cell(tbl, 3, 0, '11AM Time', text_halign = text.align_center, bgcolor = color.gray, text_color = color.white, text_size = textSize)
 
     for i = 0 to 39
         if array.get(u_arr, i)
@@ -422,7 +428,7 @@ if barstate.islast
             sup_text = array.get(sup_arr, i) == 0 ? "na" : (array.get(sup_arr, i) > 0 ? "Up" : "Down")
             sup_col  = array.get(sup_arr, i) == 0 ? color.gray : (array.get(sup_arr, i) > 0 ? color.green : color.red)
             
-            table.cell(tbl, 0, i + 1, array.get(s_arr, i),                      text_halign = text.align_left,   bgcolor = color.gray, text_color = color.white, text_size = size.small)
-            table.cell(tbl, 1, i + 1, str.tostring(array.get(cl_arr, i)),       text_halign = text.align_center, bgcolor = color.black,    text_color = color.white, text_size = size.small)
-            table.cell(tbl, 2, i + 1, sup_text,                                 text_halign = text.align_center, bgcolor = sup_col,    text_color = color.white, text_size = size.small)
-            table.cell(tbl, 3, i + 1, str.tostring(array.get(supTime_arr, i)),  text_halign = text.align_center, bgcolor = color.black,    text_color = color.white, text_size = size.small)
+            table.cell(tbl, 0, i + 1, array.get(s_arr, i),                      text_halign = text.align_left,   bgcolor = color.gray, text_color = color.white, text_size = textSize)
+            table.cell(tbl, 1, i + 1, str.tostring(array.get(cl_arr, i)),       text_halign = text.align_center, bgcolor = color.black,    text_color = color.white, text_size = textSize)
+            table.cell(tbl, 2, i + 1, sup_text,                                 text_halign = text.align_center, bgcolor = sup_col,    text_color = color.white, text_size = textSize)
+            table.cell(tbl, 3, i + 1, str.tostring(array.get(supTime_arr, i)),  text_halign = text.align_center, bgcolor = color.black,    text_color = color.white, text_size = textSize)
